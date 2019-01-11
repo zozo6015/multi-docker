@@ -1,0 +1,21 @@
+sudo: required
+service:
+  - docker
+
+before_install:
+  - docker build -t zozo6015/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run zozo6015/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t zozo6015/multi-client ./client
+  - docker build -t zozo6015/multi-nginx ./nginx
+  - docker build -t zozo6015/multi-server ./server
+  - docker build -t zozo6015/multi-worker ./worker
+  - echo "$DOCKER_PASS" |  docker login -u "$DOCKER_USER" --password-stdin
+  - docker push zozo6015/multi-client
+  - docker push zozo6015/multi-nginx
+  - docker push zozo6015/multi-server
+  - docker push zozo6015/multi-worker
+
